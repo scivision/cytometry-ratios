@@ -1,0 +1,5 @@
+setuptools
+nose
+numpy
+matplotlib
+scikit-image
