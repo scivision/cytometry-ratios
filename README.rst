@@ -24,10 +24,7 @@ If you don't have/want ``conda`` then on Debian or Ubuntu the prereqs may be ins
 
 Run program
 ===========
-Using Scikit-Image:
+::
     
     ./cclskim.py
 
-Using OpenCV
-
-    ./ccltest.py

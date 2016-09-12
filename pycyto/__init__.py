@@ -8,11 +8,11 @@ useocv=False
 if useocv:
     import cv2
 #
-from numpy import uint8,  empty
+from numpy import uint8,  empty,zeros,delete,zeros_like
 from skimage.io import imread
 from skimage.filters import threshold_otsu
 from skimage.morphology import disk,erosion,dilation
-from skimage.measure import regionprops
+from skimage.measure import regionprops,label
 from skimage.draw import circle
 #
 from .plots import plotraw,plotthres,ploterode,plotdilate,plotcentroid
@@ -43,7 +43,7 @@ def dothres(data,filtered,thresscale,maskdata,makepl,fn,odir):
         thresval = thresscale * threshold_otsu(filtered)
         thres = filtered > thresval
 
-    print('{}  Otsu threshold: '.format(fn,thresval))
+    print('{}  Otsu threshold: []'.format(fn,thresval))
 
     if 'thres' in makepl or 'all' in makepl:
         plotthres(thres,data,maskdata,fn,odir)
@@ -52,37 +52,69 @@ def dothres(data,filtered,thresscale,maskdata,makepl,fn,odir):
 
 def domorph(data,thres,maskdata,makepl,fn, odir):
     #http://docs.opencv.org/modules/imgproc/doc/filtering.html#void%20erode%28InputArray%20src,%20OutputArray%20dst,%20InputArray%20kernel,%20Point%20anchor,%20int%20iterations,%20int%20borderType,%20const%20Scalar&%20borderValue%29
-    erodekernel = disk(2, dtype=uint8)
+
     if useocv:
-        eroded = cv2.erode(thres, erodekernel)
+        erodekernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
+        eroded = cv2.erode(thres,erodekernel)
     else:
+        erodekernel = disk(2, dtype=uint8)
         eroded = erosion(thres, erodekernel)
 
     if 'erode' in makepl or 'all' in makepl:
-        ploterode(eroded,odir)
+        ploterode(eroded,fn,odir)
 #%% dilation
-    dilatekernel = disk(2, dtype=uint8)
     if useocv:
+        dilatekernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
         dilated = cv2.dilate(eroded,dilatekernel)
     else:
+        dilatekernel = disk(2, dtype=uint8) #scikit-image
         dilated = dilation(eroded, dilatekernel)
+
     if 'dilate' in makepl or 'all' in makepl:
-        plotdilate(dilated,data,maskdata,dilatekernel,fn,odir)
+        plotdilate(dilated,data,maskdata,fn,odir)
+
+    print(erodekernel)
+    print(dilatekernel)
 
     return dilated
 
-def doratio(data,cclbl,nlbl,centRad,fn,makepl,odir):
-    #http://scikit-image.org/docs/0.10.x/auto_examples/plot_regionprops.html
-    regions = regionprops(cclbl, data, True)
-    #preallocate array for centroids (not necessarily the best approach)
-    centroid_rc = empty((nlbl,2),dtype=float)
-    centroid_sum = empty(nlbl,dtype=int)
-    for iReg, region in enumerate(regions):
-        centroid_rc[iReg,:] = region.centroid # vs weighted_centroid (want unweighted)
-        csi = circle(centroid_rc[iReg,0], centroid_rc[iReg,1],
-                            radius=centRad, shape=data.shape)
-        centroid_sum[iReg] = data[csi].sum()
+def dolabel(data):
+
+    if not useocv: #use scikit image
+        cclbl,nlbl = label(data,neighbors=8,return_num=True)
+        regions = regionprops(cclbl, data, True)
+        centroids = empty((nlbl,2))
+        for i,r in enumerate(regions):
+            centroids[i,1],centroids[i,0] = r.centroid
+    else:
+        nlbl = 0
+        badind = []
+        contours,hierarchy = cv2.findContours(data, 1, 2)
+        centroids = zeros((len(contours),2),dtype=int)
+        for i,c in enumerate(contours):
+            M = cv2.moments(c)
+            try:
+                centroids[i,0] = int(M['m10']/M['m00'])
+                centroids[i,1] = int(M['m01']/M['m00'])
+                nlbl += 1
+            except ZeroDivisionError:
+                #print('skipped i='+str(i))
+                badind.append(i)
+        centroids = delete(centroids,badind,0)
+    return centroids,nlbl
+
+def doratio(data,centroids,nlbl,centRad,makepl,fn,odir):
+    centroid_sum = []
+
+    for crc in centroids:
+        if useocv:
+            circletmp = zeros_like(data) #slow!
+            cv2.circle(circletmp,(crc[1],crc[0]),centRad,1,thickness=-1)
+            csi = circletmp.astype(bool)
+        else:
+            csi = circle(crc[0], crc[1], radius=centRad, shape=data.shape) #scikit image
+        centroid_sum.append(data[csi].sum())
     if 'rawcentroid' in makepl or 'all' in makepl:
-        plotcentroid(data,centroid_rc,fn,odir)
+        plotcentroid(data,centroids,fn,odir)
 
     return centroid_sum

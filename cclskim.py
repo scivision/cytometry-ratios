@@ -14,11 +14,10 @@ from pycyto import Path
 from numpy import zeros_like
 from scipy.signal import wiener
 from time import time
-from skimage.measure import label
 from matplotlib.pyplot import show
 #from guppy import hpy
 #
-from pycyto import getdata,doratio,dothres,domorph
+from pycyto import getdata,doratio,dothres,domorph,dolabel
 
 def ccltest(fn,aparam,thresscale,makepl,odir,centRad=3,dbglvl=0):
     centroid_sum=None #in case no files read
@@ -29,7 +28,8 @@ def ccltest(fn,aparam,thresscale,makepl,odir,centRad=3,dbglvl=0):
         tic = time()
 #%% (0) read raw data
         data = getdata(fn,makepl,odir)
-        if data is None: continue
+        if data is None:
+            continue
 # setup mask (for results)
         maskdata = zeros_like(data)
 #%% (1) denoise
@@ -42,19 +42,16 @@ def ccltest(fn,aparam,thresscale,makepl,odir,centRad=3,dbglvl=0):
 #%% (3) morphological ops
         morphed = domorph(data,thres,maskdata,makepl,fn,odir)
 #%% (4) connected component labeling
-        cclbl,nlbl = label(morphed,neighbors=8,return_num=True)
+        centroids,nlbl = dolabel(morphed)
 #%% (5) property analysis (centroid extraction)
-        centroid_sum = doratio(filtered,cclbl,nlbl,centRad,fn,makepl,odir)
+        centroid_sum = doratio(filtered,centroids,nlbl,centRad,makepl,fn,odir)
         print('{:0.2f} sec. to compute {} centroids in {}'.format(time()-tic,nlbl,fn))
-#%% collect results
-   # print(hpy().heap())
 
-    return data, centroid_sum
+    # print(hpy().heap())
+
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
-    flist = ('FRAME_1457.tif','FRAME_1458.tif','FRAME_1459.tif','FRAME_1460.tif','FRAME_1461.tif','FRAME_1462.tif')
-
     p = ArgumentParser(description='OpenCV-based cell segmentation')
     p.add_argument('path',help='where image files live. Assumes len()==1: dir to glob. Else list of files',nargs='+')
     p.add_argument('-e','--ext',help='file extension to glob [default .png]',default='.png')
@@ -69,6 +66,8 @@ if __name__ == '__main__':
         path = Path(p.path[0]).expanduser()
         if path.is_dir():
             flist = path.glob('*'+p.ext)
+        else:
+            flist = [path]
     else:
         flist = p.path
 
@@ -83,6 +82,6 @@ if __name__ == '__main__':
         prof.run('ccltest(fn, args.aparam, args.thres, makepl)',profFN)
         goCprofile(profFN)
     else:
-        data, centroid_sum = ccltest(flist, p.aparam, p.thres, p.plot,p.odir)
+        ccltest(flist, p.aparam, p.thres, p.plot,p.odir)
 
     show()
