@@ -1,24 +1,33 @@
-=========
-chang-ccl
-=========
+========================
+Cytometry ratio analysis
+========================
 
-Python program using OpenCV and Scikit-image to analyze images
+Python program using Scikit-image (optionally, OpenCV) to analyze images
 
-Miniconda way
-=============
-Using Miniconda, to run cclskim.py (using only skimage)::
+Prereqs
+=======
+You can install prereqs using ``conda`` (for x86 systems) or ``apt-get install`` (ARM systems like Beaglebone or Raspberry Pi etc.)
+
+Using Conda
+--------------
+Using Miniconda, to run `cclskim.py`::
 
     conda install --file requirements.txt 
 
 
-Using Miniconda, to run ccltest.py (using only OpenCV)::
+apt-get install
+---------------
+If you don't have/want ``conda`` then on Debian or Ubuntu the prereqs may be installed::
 
-    conda install opencv
+    sudo apt-get install python-numpy python-matplotlib python-skimage python-opencv
 
 
-Non-Miniconda (Raspberry Pi Raspbian) way
-=========================================
-On Debian or Ubuntu the prereqs may be installed by::
+Run program
+===========
+Using Scikit-Image:
+    
+    ./cclskim.py
 
-    sudo apt-get install python-numpy python-matplotlib python-opencv
+Using OpenCV
 
+    ./ccltest.py
