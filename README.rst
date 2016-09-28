@@ -24,7 +24,14 @@ If you don't have/want ``conda`` then on Debian or Ubuntu the prereqs may be ins
 
 Run program
 ===========
-::
+assuming your *.png images are in a directory `../data`::
     
-    ./cclskim.py
+    ./cclskim.py ../data
 
+You can also specify a single file
+
+    ./cclskim.py ../data/mypic0.png
+
+
+-e  suffix of filenames to look for [default .png]
+-o  write all plots to a directory instead of showing on screen

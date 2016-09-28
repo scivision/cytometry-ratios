@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+"""
+This is for testing execution time of the cclskim.py program.
+"""
+
 import pstats
 import os
 
