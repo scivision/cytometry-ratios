@@ -20,6 +20,9 @@ from matplotlib.pyplot import show
 from pycyto import getdata,doratio,dothres,domorph,dolabel
 
 def ccltest(fn,aparam,thresscale,makepl,odir,centRad=3,dbglvl=0):
+    if odir:
+        odir = Path(odir).expanduser()
+
     centroid_sum=None #in case no files read
     print('summing centroid radius {} pixels.'.format(centRad))
 
@@ -56,7 +59,7 @@ if __name__ == '__main__':
     p.add_argument('path',help='where image files live. Assumes len()==1: dir to glob. Else list of files',nargs='+')
     p.add_argument('-e','--ext',help='file extension to glob [default .png]',default='.png')
     p.add_argument('-m','--aparam',help='analysis parameters e.g. "wiener"',nargs='+',default=[None])
-    p.add_argument('-p','--plot',help='plot types to make [raw thres rawthres rawcentroid]',default=[None],nargs='+')
+    p.add_argument('-p','--plot',help='plot types to make [raw thres rawthres rawcentroid]',default=['all'],nargs='+')
     p.add_argument('-t','--thres',help='Otsu threshold scaling factor [0.75]',default=0.75,type=float)
     p.add_argument('--profile',help='cProfile of code',action='store_true')
     p.add_argument('-o','--odir',help='directory to save results')

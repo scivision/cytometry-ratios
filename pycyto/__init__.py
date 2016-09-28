@@ -29,7 +29,7 @@ def getdata(fn,makepl,odir):
         return
 
     sy,sx = data.shape #assumes greyscale
-    if 'raw' in makepl or 'all' in makepl:
+    if not set(('raw','all')).isdisjoint(makepl):
         plotraw(data,fn,odir)
 
     return data
@@ -45,7 +45,7 @@ def dothres(data,filtered,thresscale,maskdata,makepl,fn,odir):
 
     print('{}  Otsu threshold: []'.format(fn,thresval))
 
-    if 'thres' in makepl or 'all' in makepl:
+    if not set(('thres','all')).isdisjoint(makepl):
         plotthres(thres,data,maskdata,fn,odir)
 
     return thres
@@ -70,7 +70,7 @@ def domorph(data,thres,maskdata,makepl,fn, odir):
         dilatekernel = disk(2, dtype=uint8) #scikit-image
         dilated = dilation(eroded, dilatekernel)
 
-    if 'dilate' in makepl or 'all' in makepl:
+    if not set(('dilate','all')).isdisjoint(makepl):
         plotdilate(dilated,data,maskdata,fn,odir)
 
     print(erodekernel)
@@ -114,7 +114,7 @@ def doratio(data,centroids,nlbl,centRad,makepl,fn,odir):
         else:
             csi = circle(crc[0], crc[1], radius=centRad, shape=data.shape) #scikit image
         centroid_sum.append(data[csi].sum())
-    if 'rawcentroid' in makepl or 'all' in makepl:
+    if not set(('rawcentroid','all')).isdisjoint(makepl):
         plotcentroid(data,centroids,fn,odir)
 
     return centroid_sum
