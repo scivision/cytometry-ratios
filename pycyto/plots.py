@@ -3,10 +3,12 @@ from matplotlib.pyplot import figure,close
 #from matplotlib.colors import LogNorm
 #from matplotlib.ticker import LogFormatterMathtext
 
-def writeplot(fg,ofn,odir):
-    if odir:
+DPI=150 #resolution of saved plots
+
+def writeplot(fg,ofn):
+    if ofn:
         print('writing {}'.format(ofn))
-        fg.savefig(str(ofn),dpi=150,bbox_inches='tight')
+        fg.savefig(str(ofn),dpi=DPI,bbox_inches='tight')
         close(fg)
 
 def plotraw(data,fn,odir):
@@ -17,7 +19,7 @@ def plotraw(data,fn,odir):
     ax.set_title('raw {} data:  {}'.format(data.dtype, fn))
     ax.autoscale(True)
     if odir:
-        writeplot(fg,fn,odir / (fn.name + '_raw.png'))
+        writeplot(fg,odir / (fn.name + '_raw.png'))
 
 def plotthres(thres,data,maskdata,fn,odir):
     fg = figure()
@@ -25,7 +27,7 @@ def plotthres(thres,data,maskdata,fn,odir):
     ax.imshow(thres)
     ax.set_title('threshold binary result  {}'.format(fn))
     if odir:
-       writeplot(fg,fn,odir / (fn.name + '_thres.png'))
+       writeplot(fg,odir / (fn.name + '_thres.png'))
 
     maskthres = masked_where(thres,maskdata)
     fg = figure();
@@ -37,7 +39,7 @@ def plotthres(thres,data,maskdata,fn,odir):
     ax.set_xlabel('x-pixel')
     ax.set_ylabel('y-pixel')
     if odir:
-       writeplot(fg,fn,odir / (fn.name + '_thres_raw.png'))
+       writeplot(fg,odir / (fn.name + '_thres_raw.png'))
 
 def ploterode(eroded,fn,odir):
     fg = figure()
@@ -45,7 +47,7 @@ def ploterode(eroded,fn,odir):
     ax.imshow(eroded)
     ax.set_title('erosion binary result {}'.format(fn))
     if odir:
-       writeplot(fg,fn,odir / (fn.name + '_erode.png'))
+       writeplot(fg,odir / (fn.name + '_erode.png'))
 
 def plotdilate(dilated,data,maskdata,fn,odir):
     fg = figure()
@@ -55,7 +57,7 @@ def plotdilate(dilated,data,maskdata,fn,odir):
     ax.set_ylabel('y-pixel')
     ax.set_title('dilation binary result {}'.format(fn))
     if odir:
-       writeplot(fg,fn,odir / (fn.name + '_dilate.png'))
+       writeplot(fg,odir / (fn.name + '_dilate.png'))
 
     maskdilate = masked_where(dilated,maskdata)
     fg = figure(); ax = fg.gca()
@@ -66,7 +68,7 @@ def plotdilate(dilated,data,maskdata,fn,odir):
     ax.set_xlabel('x-pixel')
     ax.set_ylabel('y-pixel')
     if odir:
-        writeplot(fg,fn,odir / (fn.name + '_dilate_raw.png'))
+        writeplot(fg,odir / (fn.name + '_dilate_raw.png'))
 
 def plotcentroid(data,centroid_rc,fn,odir):
     fg = figure()
@@ -81,4 +83,4 @@ def plotcentroid(data,centroid_rc,fn,odir):
     ax.set_ylabel('y-pixel')
     ax.autoscale(True,tight=True)
     if odir:
-        writeplot(fg,fn,odir / (fn.name + '_centroid.png'))
+        writeplot(fg, odir / (fn.name + '_centroid.png'))

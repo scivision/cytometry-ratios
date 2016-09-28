@@ -4,9 +4,11 @@ try:
 except (ImportError,AttributeError):
     from pathlib2 import Path
 #
-useocv=False
-if useocv:
+if False:
     import cv2
+else:
+    cv2=None
+    
 #
 from numpy import uint8,  empty,zeros,delete,zeros_like
 from skimage.io import imread
@@ -18,14 +20,14 @@ from skimage.draw import circle
 from .plots import plotraw,plotthres,ploterode,plotdilate,plotcentroid
 #%%
 def getdata(fn,makepl,odir):
-    if useocv:
+
+    if cv2 is not None:
         data = cv2.imread(fn,cv2.CV_LOAD_IMAGE_GRAYSCALE) #uint8 data for this example .tif
     else:
         data = imread(fn,as_grey=True) # if data is gray integer, maintains that
 
     if data is None:
         print('{} not found'.format(fn))
-        #centroid_sum = None
         return
 
     sy,sx = data.shape #assumes greyscale
@@ -35,7 +37,7 @@ def getdata(fn,makepl,odir):
     return data
 
 def dothres(data,filtered,thresscale,maskdata,makepl,fn,odir):
-    if useocv:
+    if cv2 is not None:
         thresval = int(round(thresscale * cv2.threshold(filtered,0,255, cv2.THRESH_OTSU)[0]))
         #we need to modify the Otsu value a little (this is common, see matlab vision.AutoThresholder)
         thres = cv2.threshold(filtered,thresval,255,cv2.THRESH_BINARY)[1]
@@ -53,17 +55,17 @@ def dothres(data,filtered,thresscale,maskdata,makepl,fn,odir):
 def domorph(data,thres,maskdata,makepl,fn, odir):
     #http://docs.opencv.org/modules/imgproc/doc/filtering.html#void%20erode%28InputArray%20src,%20OutputArray%20dst,%20InputArray%20kernel,%20Point%20anchor,%20int%20iterations,%20int%20borderType,%20const%20Scalar&%20borderValue%29
 
-    if useocv:
+    if cv2 is not None:
         erodekernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
         eroded = cv2.erode(thres,erodekernel)
     else:
         erodekernel = disk(2, dtype=uint8)
         eroded = erosion(thres, erodekernel)
 
-    if 'erode' in makepl or 'all' in makepl:
+    if not set(('erode','all')).isdisjoint(makepl):
         ploterode(eroded,fn,odir)
 #%% dilation
-    if useocv:
+    if cv2 is not None:
         dilatekernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
         dilated = cv2.dilate(eroded,dilatekernel)
     else:
@@ -80,7 +82,7 @@ def domorph(data,thres,maskdata,makepl,fn, odir):
 
 def dolabel(data):
 
-    if not useocv: #use scikit image
+    if cv2 is None: #use scikit image
         cclbl,nlbl = label(data,neighbors=8,return_num=True)
         regions = regionprops(cclbl, data, True)
         centroids = empty((nlbl,2))
@@ -107,7 +109,7 @@ def doratio(data,centroids,nlbl,centRad,makepl,fn,odir):
     centroid_sum = []
 
     for crc in centroids:
-        if useocv:
+        if cv2 is not None:
             circletmp = zeros_like(data) #slow!
             cv2.circle(circletmp,(crc[1],crc[0]),centRad,1,thickness=-1)
             csi = circletmp.astype(bool)

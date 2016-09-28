@@ -19,7 +19,7 @@ from matplotlib.pyplot import show
 #
 from pycyto import getdata,doratio,dothres,domorph,dolabel
 
-def ccltest(fn,aparam,thresscale,makepl,odir,centRad=3,dbglvl=0):
+def ccltest(flist,aparam,thresscale,makepl,odir,centRad=3,dbglvl=0):
     if odir:
         odir = Path(odir).expanduser()
 
