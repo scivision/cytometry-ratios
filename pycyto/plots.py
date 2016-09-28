@@ -71,16 +71,17 @@ def plotdilate(dilated,data,maskdata,fn,odir):
         writeplot(fg,odir / (fn.name + '_dilate_raw.png'))
 
 def plotcentroid(data,centroid_rc,fn,odir):
+    assert data.ndim==2,'single image'
+    assert centroid_rc.shape[1] == 2,'Ncell x 2   (row,column is second axis)'
     fg = figure()
     ax = fg.gca()
     hi = ax.imshow(data, cmap='gray', origin='upper', interpolation='none')#, norm=LogNorm())
     hc = fg.colorbar(hi)
     hc.set_label('data numbers')
-    ax.plot(centroid_rc[:,1],centroid_rc[:,0],
-            marker='.', linestyle='none',color='red',markersize=1)
+    ax.scatter(centroid_rc[:,0],centroid_rc[:,1], color='red')
     ax.set_title('centroids of {} connected regions  of {}'.format(centroid_rc.shape[0],fn))
     ax.set_xlabel('x-pixel')
     ax.set_ylabel('y-pixel')
-    ax.autoscale(True,tight=True)
+    ax.autoscale(True,'both',tight=True)
     if odir:
         writeplot(fg, odir / (fn.name + '_centroid.png'))
