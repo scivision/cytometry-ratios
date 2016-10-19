@@ -21,7 +21,7 @@ if __name__ == '__main__':
     p = ArgumentParser()
     p.add_argument('--nx',type=int,default=1280,help='xpixels')
     p.add_argument('--ny',type=int,default=960,help='ypixels')
-    p.add_argument('--pct',type=float,default=5,help='percent of pixels with cells')
+    p.add_argument('--pct',type=float,default=0.1,help='percent of pixels with cells')
     p = p.parse_args()
 
     im = nuclei(p.nx, p.ny, p.pct)

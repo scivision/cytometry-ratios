@@ -2,7 +2,10 @@
 Cytometry ratio analysis
 ========================
 
-Python program using Scikit-image (optionally, OpenCV) to analyze images
+Python program using Scikit-image (optionally, OpenCV) to simulate and analyze whole-slide cytometry images
+
+.. image:: data/demo.png
+    :scale: 50%
 
 .. contents::
 
