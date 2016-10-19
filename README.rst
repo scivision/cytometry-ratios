@@ -26,7 +26,7 @@ apt-get install
 ---------------
 If you don't have/want ``conda`` then on Debian or Ubuntu the prereqs may be installed::
 
-    sudo apt-get install python-numpy python-matplotlib python-skimage python-opencv
+    sudo apt-get install python-numpy python-matplotlib python-skimage
 
 
 Run Analysis
