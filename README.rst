@@ -4,10 +4,10 @@ Cytometry ratio analysis
 
 Python program using Scikit-image (optionally, OpenCV) to simulate and analyze whole-slide cytometry images
 
-<figure>
-<img src="data/demo.png" alt="simulated whole slide with individual cells">
-<figcaption>whole slide noise-free forward model</figcaption>
-</figure>
+.. image:: data/demo.png
+    :alt: simulated whole slide with individual cells
+*whole slide noise-free forward model*
+
 
 .. contents::
 
