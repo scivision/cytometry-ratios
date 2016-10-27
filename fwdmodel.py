@@ -8,9 +8,9 @@ from matplotlib.pyplot import figure,show
 
 BITS=12
 
-def nuclei(Nx,Ny,cellpct):
+def nuclei(Nx,Ny,cellpct,dtype='uint16'):
 
-    im = zeros((Ny,Nx),dtype='uint16')
+    im = zeros((Ny,Nx), dtype=dtype)
     im = random_noise(im,'s&p',amount=2*cellpct/100) * (2**BITS - 1)
 
     return im.astype('uint16') #random_noise pushes to float64
