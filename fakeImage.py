@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 """
 Created on Thu Oct 20 21:11:36 2016
 
@@ -29,15 +28,15 @@ calculate distance from led to each pixel, pretty straightforward, just
 use distance formula and assume constant z=0, light intensity decreases
 with the square of the distance to the source
 
-also calculate angular displacement from center line of LED, the light 
-intensity decreases as your angle from the center of the led increases, see 
+also calculate angular displacement from center line of LED, the light
+intensity decreases as your angle from the center of the led increases, see
 http://www.ledengin.com/files/products/LZ4/LZ4-04UV00.pdf page 8,
 basically you have to find the angle between two lines, one from the led
 to the center of the stage and the other the line from an arbitrary point
-on the stage to the led. set up 2 vectors and use dot product to find angle 
+on the stage to the led. set up 2 vectors and use dot product to find angle
 between vectors
 
-light intensity decreases at a rate like 1-(x^2)/1.9 if x is radians 
+light intensity decreases at a rate like 1-(x^2)/1.9 if x is radians
 from the center of the led
 """
 pixel_size = slide_size/pixels

@@ -13,7 +13,7 @@ def nuclei(Nx,Ny,cellpct):
     im = zeros((Ny,Nx),dtype='uint16')
     im = random_noise(im,'s&p',amount=2*cellpct/100) * (2**BITS - 1)
 
-    return im
+    return im.astype('uint16') #random_noise pushes to float64
 
 
 if __name__ == '__main__':
@@ -30,6 +30,6 @@ if __name__ == '__main__':
 
     ax = figure().gca()
     ax.imshow(im,cmap='gray',interpolation='none',origin='bottom')
-    ax.set_title('noise-free')
+    ax.set_title('noise-free {}'.format(im.dtype))
 
     show()
