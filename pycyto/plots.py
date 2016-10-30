@@ -1,5 +1,6 @@
 from numpy.ma import masked_where
-from matplotlib.pyplot import figure,close
+from numpy import ones
+from matplotlib.pyplot import figure,close,subplots
 #from matplotlib.colors import LogNorm
 #from matplotlib.ticker import LogFormatterMathtext
 
@@ -10,6 +11,25 @@ def writeplot(fg,ofn):
         print('writing {}'.format(ofn))
         fg.savefig(str(ofn),dpi=DPI,bbox_inches='tight')
         close(fg)
+
+def plotillum(im,Iang,invsq):
+    test = ones(im.shape)
+
+    out = test * Iang * invsq
+
+    fg,axs = subplots(1,2,sharex=True,sharey=True)
+    ax = axs[0]
+    h=ax.pcolormesh(im,cmap='gray',vmax=out.max())
+    ax.set_title('gaussian blur, poisson noise')
+    fg.colorbar(h,ax=ax)
+    ax.autoscale(True,tight=True)
+
+    ax = axs[1]
+    h = ax.imshow(out,'gray')
+    fg.colorbar(h,ax=ax)
+    ax.contour(invsq)
+    ax.contour(Iang)
+    ax.set_title('optical setup adjustment')
 
 def plotraw(data,fn,odir):
     fg = figure()
@@ -79,7 +99,7 @@ def plotcentroid(data,centroid_rc,fn,odir):
     hc = fg.colorbar(hi)
     hc.set_label('data numbers')
     ax.scatter(centroid_rc[:,0],centroid_rc[:,1], color='red')
-    ax.set_title('centroids of {} connected regions  of {}'.format(centroid_rc.shape[0],fn))
+    ax.set_title('centroids of {} connected regions: {}'.format(centroid_rc.shape[0],fn))
     ax.set_xlabel('x-pixel')
     ax.set_ylabel('y-pixel')
     ax.autoscale(True,'both',tight=True)

@@ -11,44 +11,20 @@ algorithm:
 Note: the ccltest() return arguments simply pass out the values from the most recent image, this is trivial to fix if desired
 '''
 from pycyto import Path
-from numpy import zeros_like
-from scipy.signal import wiener
-from time import time
 from matplotlib.pyplot import show
 #from guppy import hpy
 #
-from pycyto import getdata,doratio,dothres,domorph,dolabel
+from pycyto import getdata,doccl
 
-def ccltest(flist,aparam,thresscale,makepl,odir,centRad=3,dbglvl=0):
-    if odir:
-        odir = Path(odir).expanduser()
-
-    centroid_sum=None #in case no files read
-    print('summing centroid radius {} pixels.'.format(centRad))
-
+def ccltest(flist,P):
     for fn in flist:
         fn = Path(fn).expanduser()
-        tic = time()
 #%% (0) read raw data
-        data = getdata(fn,makepl,odir)
+        data = getdata(fn,P)
         if data is None:
             continue
-# setup mask (for results)
-        maskdata = zeros_like(data)
-#%% (1) denoise
-        if 'wiener' in aparam:
-            filtered = wiener(data,[5,5]) #TODO puts in negative values
-        else:
-            filtered = data
-#%% (2) threshold (Otsu)
-        thres = dothres(data,filtered,thresscale,maskdata,makepl,fn,odir)
-#%% (3) morphological ops
-        morphed = domorph(data,thres,maskdata,makepl,fn,odir)
-#%% (4) connected component labeling
-        centroids,nlbl = dolabel(morphed)
-#%% (5) property analysis (centroid extraction)
-        centroid_sum = doratio(filtered,centroids,nlbl,centRad,makepl,fn,odir)
-        print('{:0.2f} sec. to compute {} centroids in {}'.format(time()-tic,nlbl,fn))
+
+        doccl(data)
 
     # print(hpy().heap())
 
@@ -61,8 +37,10 @@ if __name__ == '__main__':
     p.add_argument('-m','--aparam',help='analysis parameters e.g. "wiener"',nargs='+',default=[None])
     p.add_argument('-p','--plot',help='plot types to make [raw thres rawthres rawcentroid]',default=['all'],nargs='+')
     p.add_argument('-t','--thres',help='Otsu threshold scaling factor [0.75]',default=0.75,type=float)
+    p.add_argument('-r','--centrad',help='radius about cell center to sum',type=int,default=3)
     p.add_argument('--profile',help='cProfile of code',action='store_true')
     p.add_argument('-o','--odir',help='directory to save results')
+    p.add_argument('-v','--verbose',action='count',default=0)
     p = p.parse_args()
 
     if len(p.path)==1:
@@ -73,6 +51,16 @@ if __name__ == '__main__':
             flist = [path]
     else:
         flist = p.path
+
+    P = {'param':p.aparam,
+         'makeplot':p.plot,
+         'odir':p.odir,
+         'ext':p.ext,
+         'thres':p.thres,
+         'centrad':p.centrad,
+         'verbose':p.verbose,
+         'erode':True,
+        }
 
     if p.profile:
         try:
@@ -85,6 +73,6 @@ if __name__ == '__main__':
         prof.run('ccltest(fn, args.aparam, args.thres, makepl)',profFN)
         goCprofile(profFN)
     else:
-        ccltest(flist, p.aparam, p.thres, p.plot,p.odir)
+        ccltest(flist, P)
 
     show()
