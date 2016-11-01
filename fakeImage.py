@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """
-Created on Thu Oct 20 21:11:36 2016
-
 @author: greg
 """
 from matplotlib.pyplot import subplots,show
