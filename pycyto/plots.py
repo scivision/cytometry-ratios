@@ -12,19 +12,22 @@ def writeplot(fg,ofn):
         fg.savefig(str(ofn),dpi=DPI,bbox_inches='tight')
         close(fg)
 
-def plotillum(im,Iang,invsq):
+def plotillum(im,Iang,invsq,verbose=False):
     test = ones(im.shape)
 
     out = test * Iang * invsq
 
-    fg,axs = subplots(1,2,sharex=True,sharey=True)
-    ax = axs[0]
-    h=ax.pcolormesh(im,cmap='gray',vmax=out.max())
-    ax.set_title('gaussian blur, poisson noise')
-    fg.colorbar(h,ax=ax)
-    ax.autoscale(True,tight=True)
+    if verbose:
+        fg,axs = subplots(1,2,sharex=True,sharey=True)
+        ax = axs[0]
+        h=ax.pcolormesh(im,cmap='gray',vmax=out.max())
+        ax.set_title('gaussian blur, poisson noise')
+        fg.colorbar(h,ax=ax)
+        ax.autoscale(True,tight=True)
+        ax = axs[1]
+    else:
+        ax = figure().gca()
 
-    ax = axs[1]
     h = ax.imshow(out,'gray')
     fg.colorbar(h,ax=ax)
     ax.contour(invsq)

@@ -94,7 +94,7 @@ def illum(im,slide_size,Nxy,AT,leddist,ledang,verbose=False):
     Iang = 1 - radiation_pattern**2 / 1.9
 
     if verbose:
-        plotillum(Iang,invsq)
+        plotillum(im,Iang,invsq,verbose)
 
     uv = AT * im * Iang * invsq    # Hoechst 33342 bonds to AT only
 
