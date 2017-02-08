@@ -2,6 +2,7 @@
 """
 Forward model for Whole Slide Cytometry with diluted whole blood
 """
+from __future__ import division
 from numpy import zeros,count_nonzero
 from skimage.util import random_noise
 from matplotlib.pyplot import figure,show

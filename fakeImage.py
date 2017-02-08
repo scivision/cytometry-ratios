@@ -2,6 +2,7 @@
 """
 @author: greg
 """
+from __future__ import division
 from matplotlib.pyplot import subplots,show
 import numpy as np
 #

@@ -2,6 +2,7 @@
 from setuptools import setup
 
 setup(name='pycyto',
-      install_requires=['pathlib2'],
+      url='https://github.com/scienceopen/cytometry-ratios',
+      description='prototyping of whole slide cytometer',
       packages=['pycyto'],
     )

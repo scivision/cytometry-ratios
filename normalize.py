@@ -1,5 +1,6 @@
-from numpy import e,pi,meshgrid,arange,sin,sqrt,cos,arccos,exp, \
-                    zeros,max,random,argmax,argmin,ones_like,array
+from __future__ import division
+from numpy import (e,pi,meshgrid,arange,sin,sqrt,cos,arccos,exp,
+                    zeros,max,random,argmax,argmin,ones_like,array)
 import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter
 
