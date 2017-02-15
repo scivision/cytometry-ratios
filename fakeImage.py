@@ -64,8 +64,8 @@ if __name__ == '__main__':
 
     simout(uv,blue)
 
-    uv_sum,centroids = doccl(uv,None,'',P)
-    blue_sum = doccl(blue,centroids,'',P)[0]
+    uv_sum,centroids = doccl(uv,P)
+    blue_sum = doccl(blue,P,centroids)[0]
 #%% estimation
     """
     X/(X + Y) <> .8 falciparum

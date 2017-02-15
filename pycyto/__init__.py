@@ -20,34 +20,64 @@ from skimage.morphology import disk,erosion,dilation
 from skimage.measure import regionprops,label
 from skimage.draw import circle
 from scipy.ndimage import gaussian_filter
+import tifffile
 #
 from .plots import plotraw,plotthres,ploterode,plotdilate,plotcentroid,plotillum
 
-def doccl(data,centroids,fn,P):
-# setup mask (for results)
+def doccl(data,P,centroids=None,fn=''):
+#%% setup mask (for results)
     maskdata = zeros_like(data)
 #%% (1) denoise
+    """
+    Wiener filters are effective for additive white noise. 
+    In the spatial frequency domain, most images are domainated by low frequencies,
+    while AWGN is at all spatial frequencies, allowing the noise statistics to be 
+    estimated and thereby reduce the noise.
+    
+    Other filter choices at 
+    http://scikit-image.org/docs/dev/api/skimage.restoration.html
+    """
     if 'aparam' in P and 'wiener' in P['aparam']:
         filtered = wiener(data, [5,5]) #TODO puts in negative values
     else:
         filtered = data
 #%% (2) threshold (Otsu)
+    """
+    thres: binary array of the same dimensions as the raw image, where the algorithm thinks
+    the target pixels are.
+    """
     thres = dothres(data, filtered, maskdata, fn, P)
 #%% (3) morphological ops
+    """
+    Goal is to fill in gaps (allow accurate centroid computation)
+    and remove isolated noise that aren't targets
+    
+    morphed: binary array
+    """
     morphed = domorph(data, thres, maskdata, fn, P)
 #%% (4) connected component labeling
+    """
+    label areas with numbers, uniquely identifying targets.
+    """
     if centroids is None:
         centroids,nlbl,badind = dolabel(morphed)
     else:
         nlbl = centroids.size
         badind = []
 #%% (5) property analysis (centroid extraction)
+    """
+    use the labeled regions to compute the sum over a small region about the centroid.
+    This is a total power of that target, smeared by the optical system PSF.
+    """
     centroid_sum = dosum(filtered, centroids, nlbl, badind, fn, P)
     #print('{:0.2f} sec. to compute {} centroids in {}'.format(time()-tic,nlbl,fn))
 
     return centroid_sum, centroids
 
 def nuclei(Nxy,Nnuc,dtype,bitdepth):
+    """
+    simulation, fake target generator (not used for real data)
+    """
     #set up the image with cell nuclei spots on it
     im = zeros(Nxy,dtype=dtype)
     xpts = (rand(Nnuc) * (Nxy[0]-1)).astype(dtype)
@@ -106,26 +136,34 @@ def illum(im,slide_size,Nxy,AT,leddist,ledang,verbose=False):
     return uv,blue
 
 #%%
-def getdata(fn,makepl,odir):
+def getdata(fn,P):
+    """
+    TIFF is generally preferred as it allows storing multiple images with lossless compression.
+    """
+    fn = Path(fn).expanduser()
+    if not fn.is_file():
+        raise FileNotFoundError('{} not found'.format(fn))
     
-    # TODO: need tifffile.imread for bit depth > 8 ?
-    if cv2 is not None: 
-        #uint8 data for this example .tif
-        data = cv2.imread(fn,cv2.CV_LOAD_IMAGE_GRAYSCALE) 
+    if fn.suffix.lower() == '.tif':
+        data = tifffile.imread(str(fn))
+    elif cv2 is not None: 
+        data = cv2.imread(str(fn), cv2.CV_LOAD_IMAGE_GRAYSCALE) 
     else: # use skimage.io 
-        data = imread(fn,as_grey=True) # if data is gray integer, maintains that
+        data = imread(str(fn), as_grey=True) # if data is gray integer, maintains that
 
     if data is None:
-        print('{} not found'.format(fn),file=stderr)
-        return
+        raise OSError('{} error in reading'.format(fn),file=stderr)
 
     sy,sx = data.shape #assumes greyscale
-    if not set(('raw','all')).isdisjoint(makepl):
-        plotraw(data,fn,odir)
+    if not set(('raw','all')).isdisjoint(P):
+        plotraw(data,fn,P['odir'])
 
     return data
 
 def dothres(data,filtered,maskdata,fn,P):
+    """
+    Otsu might not do well with a continuum of values, no clear background or foreground
+    """
     if cv2 is not None:
         thresval = int(round(P['thres'] * cv2.threshold(filtered,0,255, cv2.THRESH_OTSU)[0]))
         #we need to modify the Otsu value a little (this is common, see matlab vision.AutoThresholder)
@@ -142,7 +180,12 @@ def dothres(data,filtered,maskdata,fn,P):
     return thres
 
 def domorph(data,thres,maskdata,fn,P):
-    #http://docs.opencv.org/modules/imgproc/doc/filtering.html#void%20erode%28InputArray%20src,%20OutputArray%20dst,%20InputArray%20kernel,%20Point%20anchor,%20int%20iterations,%20int%20borderType,%20const%20Scalar&%20borderValue%29
+    """
+    http://docs.opencv.org/modules/imgproc/doc/filtering.html#void%20erode%28InputArray%20src,%20OutputArray%20dst,%20InputArray%20kernel,%20Point%20anchor,%20int%20iterations,%20int%20borderType,%20const%20Scalar&%20borderValue%29
+
+    Erosion: remove isolated small regions
+    dilation: Fill in gaps
+    """
 
     if P['erode']:
         if cv2 is not None:
@@ -175,6 +218,9 @@ def domorph(data,thres,maskdata,fn,P):
     return dilated
 
 def dolabel(data):
+    """
+    Uniquely label contiguous regions with numbers
+    """
 
     if cv2 is None: #use scikit image
         cclbl,nlbl = label(data,neighbors=8,return_num=True)
@@ -200,6 +246,10 @@ def dolabel(data):
     return centroids,nlbl,badind
 
 def dosum(data,centroids,nlbl,badind,fn,P):
+    """
+    for each labeled region center, sum a small region around it. We compare the ratio
+    of these powers for each target to determine parasite risk.
+    """
     if P['verbose']:
         print('summing centroid radius {} pixels.'.format(P['centrad']))
 

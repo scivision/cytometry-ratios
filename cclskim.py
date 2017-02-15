@@ -20,11 +20,12 @@ def ccltest(flist,P):
     for fn in flist:
         fn = Path(fn).expanduser()
 #%% (0) read raw data
-        data = getdata(fn,P)
-        if data is None:
+        try:
+            data = getdata(fn,P)
+        except OSError:
             continue
 
-        doccl(data)
+        doccl(data, P)
 
     # print(hpy().heap())
 
