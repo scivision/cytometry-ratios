@@ -1,6 +1,0 @@
-nose
-numpy
-matplotlib
-seaborn
-scikit-image
-pathlib2
