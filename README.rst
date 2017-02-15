@@ -13,20 +13,14 @@ Python program using Scikit-image (optionally, OpenCV) to simulate and analyze w
 
 Prereqs
 =======
-You can install prereqs using ``conda`` (for x86 systems) or ``apt-get install`` (ARM systems like Beaglebone or Raspberry Pi etc.)
+The prereqs are installed with::
 
-Using Conda
---------------
-Using Miniconda, to run `cclskim.py`::
+    pip install .
 
-    conda install --file requirements.txt 
+If there aren't `.whl` for your platform, it will try to compile the modules, which could take hours on the Raspberry Pi. 
+Better in that case to do::
 
-
-apt-get install
----------------
-If you don't have/want ``conda`` then on Debian or Ubuntu the prereqs may be installed::
-
-    sudo apt-get install python-numpy python-matplotlib python-skimage
+    sudo apt install python-numpy python-matplotlib python-skimage python-opencv
 
 
 Run Analysis

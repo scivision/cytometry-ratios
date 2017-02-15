@@ -5,13 +5,13 @@ try:
 except (ImportError,AttributeError):
     from pathlib2 import Path
 #
-if False:
+try:
     import cv2
-else:
+except ImportError:
     cv2=None
-
 #
-from numpy import uint8,  empty,zeros,zeros_like, arange, fliplr,meshgrid,sqrt,cos,sin,arccos,nan
+from sys import stderr
+from numpy import uint8, empty,zeros,zeros_like, arange, fliplr,meshgrid,sqrt,cos,sin,arccos,nan
 from numpy.random import rand,poisson
 from scipy.signal import wiener
 from skimage.io import imread
@@ -28,13 +28,13 @@ def doccl(data,centroids,fn,P):
     maskdata = zeros_like(data)
 #%% (1) denoise
     if 'aparam' in P and 'wiener' in P['aparam']:
-        filtered = wiener(data,[5,5]) #TODO puts in negative values
+        filtered = wiener(data, [5,5]) #TODO puts in negative values
     else:
         filtered = data
 #%% (2) threshold (Otsu)
-    thres = dothres(data,filtered,maskdata,fn,P)
+    thres = dothres(data, filtered, maskdata, fn, P)
 #%% (3) morphological ops
-    morphed = domorph(data,thres,maskdata,fn,P)
+    morphed = domorph(data, thres, maskdata, fn, P)
 #%% (4) connected component labeling
     if centroids is None:
         centroids,nlbl,badind = dolabel(morphed)
@@ -42,22 +42,23 @@ def doccl(data,centroids,fn,P):
         nlbl = centroids.size
         badind = []
 #%% (5) property analysis (centroid extraction)
-    centroid_sum = dosum(filtered,centroids,nlbl,badind,fn,P)
+    centroid_sum = dosum(filtered, centroids, nlbl, badind, fn, P)
     #print('{:0.2f} sec. to compute {} centroids in {}'.format(time()-tic,nlbl,fn))
-    return centroid_sum,centroids
+
+    return centroid_sum, centroids
 
 def nuclei(Nxy,Nnuc,dtype,bitdepth):
     #set up the image with cell nuclei spots on it
     im = zeros(Nxy,dtype=dtype)
-    xpts = (rand(Nnuc)*(Nxy[0]-1)).astype(dtype)
-    ypts = (rand(Nnuc)*(Nxy[1]-1)).astype(dtype)
+    xpts = (rand(Nnuc) * (Nxy[0]-1)).astype(dtype)
+    ypts = (rand(Nnuc) * (Nxy[1]-1)).astype(dtype)
 
     im[ypts,xpts] = dtype(bitdepth)
 
-    bg = poisson(1,im.shape).astype(dtype)
+    bg = poisson(1, im.shape).astype(dtype)
     im += bg
 
-    im = gaussian_filter(im,1)
+    im = gaussian_filter(im, 1)
 
     return im
 
@@ -106,14 +107,16 @@ def illum(im,slide_size,Nxy,AT,leddist,ledang,verbose=False):
 
 #%%
 def getdata(fn,makepl,odir):
-
-    if cv2 is not None:
-        data = cv2.imread(fn,cv2.CV_LOAD_IMAGE_GRAYSCALE) #uint8 data for this example .tif
-    else:
+    
+    # TODO: need tifffile.imread for bit depth > 8 ?
+    if cv2 is not None: 
+        #uint8 data for this example .tif
+        data = cv2.imread(fn,cv2.CV_LOAD_IMAGE_GRAYSCALE) 
+    else: # use skimage.io 
         data = imread(fn,as_grey=True) # if data is gray integer, maintains that
 
     if data is None:
-        print('{} not found'.format(fn))
+        print('{} not found'.format(fn),file=stderr)
         return
 
     sy,sx = data.shape #assumes greyscale
