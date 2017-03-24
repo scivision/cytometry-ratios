@@ -42,7 +42,7 @@ def plotcv(dat,name):
 if __name__ == '__main__':
     from argparse import ArgumentParser
     p = ArgumentParser()
-    p.add_argument('fn',help='HDF5 filename')
+    p.add_argument('fn',help='HDF5 filename containing CV measurements.')
     p = p.parse_args()
     
     loadcv(p.fn)
