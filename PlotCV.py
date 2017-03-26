@@ -10,8 +10,9 @@ import h5py
 import seaborn
 seaborn.set_style('ticks')
 
-LVL = append(arange(1.0,2.0,.1),arange(2.,4.,.2))
+LVL = append(arange(1.0,2.0,.1),arange(2.,6.,.2))
 #LVL=10
+CVminmax = [1,10]
 
 def loadcv(fn):
     fn = Path(fn).expanduser()
@@ -27,7 +28,8 @@ def plotcv(dat,name):
   
     fg = figure()
     ax = fg.gca()
-    hi=ax.imshow(dat,cmap='cubehelix_r',origin='bottom')
+    hi=ax.imshow(dat,cmap='cubehelix_r',origin='bottom',
+                 vmin=CVminmax[0],vmax=CVminmax[1])
     fg.colorbar(hi).set_label('CV %')
     hc = ax.contour(D,LVL,colors='k')
     ax.clabel(hc,fmt='%0.1f')
