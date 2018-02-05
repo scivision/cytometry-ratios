@@ -1,21 +1,14 @@
 #!/usr/bin/env python
-req = ['nose','numpy','matplotlib','seaborn','scikit-image','scipy','pillow','pathlib2']
-pipreq = ['tifffile']
+install_requires = ['numpy','matplotlib','seaborn','scikit-image','scipy','pillow','tifffile']
 # %%
-import pip
-try:
-    import conda.cli
-    conda.cli.main('install',*req)
-except Exception as e:
-    pip.main(['install'] + req)
-pip.main(['install'] + pipreq)
-# %%
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='pycyto',
-      packages=['pycyto'],
+      packages=find_packages(),
       author='Michael Hirsch, Ph.D.',
-      version='0.1',
+      version='0.1.0',
       url='https://github.com/scivision/cytometry-ratios',
       description='prototyping of whole slide cytometer',
+      long_description=open('README.rst').read(),
+      install_requires=install_requires,
     )
