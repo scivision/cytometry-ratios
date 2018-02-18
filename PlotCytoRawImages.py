@@ -8,7 +8,7 @@ Michael Hirsch, Ph.D.
 """
 from pathlib import Path
 import numpy as np
-import scipy
+import imageio
 from skimage.filters import gaussian
 from matplotlib.pyplot import figure,show
 from mpl_toolkits.mplot3d import Axes3D
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         if fn.suffix.startswith('.tif'):
             img = tifffile.imread(str(fn))
         else:
-            img = scipy.ndimage.imread(fn)[1:-1,:,0]  # sumix stores all 3 RGB the same values for mono
+            img = imageio.imread(fn)[1:-1,:,0]  # sumix stores all 3 RGB the same values for mono
         plotimg(img, fn)
 # %% impulse plot
     imp = np.zeros((72, 72))
