@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 install_requires = ['numpy','matplotlib','seaborn','scikit-image','scipy','imageio','tifffile']
+tests_require=[]
 # %%
 from setuptools import setup, find_packages
 
@@ -11,5 +12,7 @@ setup(name='pycyto',
       description='prototyping of whole slide cytometer',
       long_description=open('README.rst').read(),
       install_requires=install_requires,
+      extras_require={'tests':tests_require},
+      tests_require=tests_require,
       python_requires=">=3.5",
     )

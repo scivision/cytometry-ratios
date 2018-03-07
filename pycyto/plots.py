@@ -8,8 +8,8 @@ DPI=150 #resolution of saved plots
 
 def writeplot(fg,ofn):
     if ofn:
-        print('writing {}'.format(ofn))
-        fg.savefig(str(ofn),dpi=DPI,bbox_inches='tight')
+        print('writing',ofn)
+        fg.savefig(ofn,dpi=DPI,bbox_inches='tight')
         close(fg)
 
 def plotillum(im,Iang,invsq,verbose=False):
